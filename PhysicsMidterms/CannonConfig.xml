@@ -1,0 +1,3 @@
+<Config Type="Cannon">
+	<Data minYaw = "-0.0785398f"  maxYaw ="0.0785398f" minPitch ="0.5f"  maxPitch ="25.132741f" ></Data>
+</Config>
