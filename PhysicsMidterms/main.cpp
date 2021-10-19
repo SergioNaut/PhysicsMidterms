@@ -3,9 +3,17 @@
 #include <string>
 #include <fstream>
 
+//XML
 #include <rapidxml/rapidxml.hpp>
 #include <rapidxml/rapidxml_utils.hpp>
 
+//Graphics
+#include <graphics/graphics.h>
+#include <input/input.h>
+#include <graphics/cCamera.h>
+#include <graphics/cameras/c3rdPersonCamera.h>
+#include <graphics/cGraphicsComponent.h>
+#include <physics/cParticleWorld.h>
 
 
 #pragma region GenericXMLstuff

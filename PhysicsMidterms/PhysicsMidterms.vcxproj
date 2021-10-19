@@ -78,7 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Extern\rapidjson;$(SolutionDir)Extern\rapidxml;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Extern\glew\include;$(SolutionDir)Extern\glfw\include;$(SolutionDir)Extern\FreeImage\include;$(SolutionDir)Extern\glm\include;$(ProjectDir)include;$(SolutionDir)Extern\assimp\include;$(SolutionDir)Extern\rapidjson;$(SolutionDir)Extern\rapidxml;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Extern\glew\lib\$(Platform);$(SolutionDir)Extern\glfw\lib\$(Platform);$(SolutionDir)Extern\FreeImage\lib\$(Platform)\$(Configuration);$(SolutionDir)Extern\assimp\lib\$(Platform)\$(Configuration);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -121,7 +122,12 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glfw3.lib;glew32s.lib;OpenGL32.lib;assimp-vc142-mtd.lib;FreeImaged.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)Extern\Assimp\lib\x64\Debug\assimp-vc142-mtd.dll" "$(OutDir)assimp-vc142-mtd.dll"
+copy /Y "$(SolutionDir)Extern\FreeImage\lib\x64\Debug\FreeImaged.dll" "$(OutDir)FreeImaged.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -141,6 +147,29 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\graphics\cameras\c3rdPersonCamera.cpp" />
+    <ClCompile Include="src\graphics\cBuffer.cpp" />
+    <ClCompile Include="src\graphics\cCamera.cpp" />
+    <ClCompile Include="src\graphics\cGraphicsComponent.cpp" />
+    <ClCompile Include="src\graphics\cMesh.cpp" />
+    <ClCompile Include="src\graphics\cMeshManager.cpp" />
+    <ClCompile Include="src\graphics\cTexture.cpp" />
+    <ClCompile Include="src\graphics\cTextureManager.cpp" />
+    <ClCompile Include="src\graphics\cVertex.cpp" />
+    <ClCompile Include="src\graphics\gl_errors.cpp" />
+    <ClCompile Include="src\graphics\graphics.cpp" />
+    <ClCompile Include="src\graphics\load\cImageFile.cpp" />
+    <ClCompile Include="src\graphics\load\LoadCubeMapFromFiles.cpp" />
+    <ClCompile Include="src\graphics\load\LoadSingleMeshFromFile.cpp" />
+    <ClCompile Include="src\graphics\load\LoadTextureFromFile.cpp" />
+    <ClCompile Include="src\graphics\shader\cLitShader.cpp" />
+    <ClCompile Include="src\graphics\shader\cSimpleShader.cpp" />
+    <ClCompile Include="src\graphics\shader\LoadShader.cpp" />
+    <ClCompile Include="src\input\cInputManager.cpp" />
+    <ClCompile Include="src\input\cKey.cpp" />
+    <ClCompile Include="src\input\input.cpp" />
+    <ClCompile Include="src\physics\cParticle.cpp" />
+    <ClCompile Include="src\physics\cParticleWorld.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BulletConfig.xml" />
@@ -148,6 +177,39 @@
     <Xml Include="CannonConfig.xml" />
     <Xml Include="EnergyBallConfig.xml" />
     <Xml Include="LaserConfig.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\extern_includes.h" />
+    <ClInclude Include="include\graphics\cameras\c3rdPersonCamera.h" />
+    <ClInclude Include="include\graphics\cBuffer.h" />
+    <ClInclude Include="include\graphics\cCamera.h" />
+    <ClInclude Include="include\graphics\cGraphicsComponent.h" />
+    <ClInclude Include="include\graphics\cMesh.h" />
+    <ClInclude Include="include\graphics\cMeshManager.h" />
+    <ClInclude Include="include\graphics\cTexture.h" />
+    <ClInclude Include="include\graphics\cTextureManager.h" />
+    <ClInclude Include="include\graphics\cVertex.h" />
+    <ClInclude Include="include\graphics\gl_errors.h" />
+    <ClInclude Include="include\graphics\graphics.h" />
+    <ClInclude Include="include\graphics\iCamera.h" />
+    <ClInclude Include="include\graphics\load\Assimp.h" />
+    <ClInclude Include="include\graphics\load\cImageFile.h" />
+    <ClInclude Include="include\graphics\load\LoadCubeMapFromFiles.h" />
+    <ClInclude Include="include\graphics\load\LoadSingleMeshFromFile.h" />
+    <ClInclude Include="include\graphics\load\LoadTextureFromFile.h" />
+    <ClInclude Include="include\graphics\load\sMeshLoadingInfo.h" />
+    <ClInclude Include="include\graphics\sBufferIds.h" />
+    <ClInclude Include="include\graphics\shader\cLitShader.h" />
+    <ClInclude Include="include\graphics\shader\cSimpleShader.h" />
+    <ClInclude Include="include\graphics\shader\LoadShader.h" />
+    <ClInclude Include="include\graphics\shader\shader_vars.h" />
+    <ClInclude Include="include\graphics\sTextureLoadingInfo.h" />
+    <ClInclude Include="include\input\cInputManager.h" />
+    <ClInclude Include="include\input\cKey.h" />
+    <ClInclude Include="include\input\input.h" />
+    <ClInclude Include="include\input\input_keys.h" />
+    <ClInclude Include="include\physics\cParticle.h" />
+    <ClInclude Include="include\physics\cParticleWorld.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
