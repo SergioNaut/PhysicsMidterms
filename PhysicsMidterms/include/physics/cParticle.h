@@ -32,6 +32,8 @@ namespace nPhysics
 		void SetDamping(float damping);
 		float GetDamping() const;
 
+		//Added to change mass after particle was created
+		void SetMass(float newMass);
 		float GetMass() const;
 		float GetInverseMass() const;
 

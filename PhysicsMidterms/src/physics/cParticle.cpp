@@ -23,6 +23,20 @@ namespace nPhysics
 
 	}
 
+	//Added to setup mass after particle has been created
+	void cParticle::SetMass(float newMass)
+	{
+		if (newMass <= 0.f)
+		{
+			mInverseMass = 0.f;
+		}
+		else
+		{
+			mInverseMass = 1.f / newMass;
+		}
+	}
+
+
 	void cParticle::SetDamping(float damping)
 	{
 		mDamping = glm::clamp(damping, 0.f, 1.f);
