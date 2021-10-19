@@ -9,16 +9,6 @@
 
 
 #pragma region GenericXMLstuff
-//TO DO: Useless?
-//bool SetValue(rapidxml::xml_attribute<>* valueIn, int& valueOut)
-//{
-//	if (!valueIn)
-//	{
-//		return false;
-//	}
-//	valueOut = std::stoi(valueIn->value());
-//	return true;
-//}
 
 bool SetValue(rapidxml::xml_node<>* valueIn, std::string& valueOut)
 {
@@ -176,6 +166,7 @@ bool ReadCannonConfigFromXML(const std::string& filePath, sCannonConfig& configO
 
 int main()
 {
+#pragma region Tests
 	sConfig projectileConfig;
 	sCannonConfig cannonConfig;
 
@@ -183,5 +174,10 @@ int main()
 	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);
 
 	std::cout << projectileConfig.ProjectileDef.gravity  << std::endl;
-	std::cout << cannonConfig.CannonDef.maxYaw;
+	std::cout << cannonConfig.CannonDef.maxYaw << std::endl;
+
+	float gravity = projectileConfig.ProjectileDef.gravity;
+	std::cout << gravity;
+#pragma endregion
+
  }
