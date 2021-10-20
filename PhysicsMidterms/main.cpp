@@ -312,11 +312,14 @@ int main()
 		glm::set(graphicsDef.Scale, 10.0f, 0.2f, 10.0f);
 		planeGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 	}
-		//Cannon
+	//Cannon
+	//TO DO: Change texture to black
 	nGraphics::sGraphicsComponentDef graphicsDef;
 	graphicsDef.Mesh = "cannon";
-	glm::set(graphicsDef.ModelColor, 1.0f, 1.0f, 1.0f, 1.0f);
-	glm::set(graphicsDef.Position, 0.0f, 1.0f, 0.0f);
+	graphicsDef.TexDiffuse = "white";
+	glm::set(graphicsDef.ModelColor, 0.0f, 0.0f, 0.0f, 1.0f);
+	glm::set(graphicsDef.Position, 0.5f, 0.0f, 0.5f);
+	glm::set(graphicsDef.Rotation, -1.57f, 0.0f, 0.0f);
 	glm::set(graphicsDef.Scale, 20.f, 20.1f, 20.1f);
 	cannonGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 
@@ -337,12 +340,15 @@ int main()
 #pragma endregion
  }
 
- //TO DO: Change So each type of projectile is created
+ //TODO: Change So each type of projectile is created
+ //TODO: MAKE CANNON ROTATION WORK
 void InitProject1Variables(glm::mat3& axes, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration)
 {
+	//TODO: Change the axes
 	axes = orthonormalBasis(getRandomXVector(), getRandomZVector());
 	// because our "sphere" has a radius of 1
 	position = glm::vec3(0.0, 1.1f, 0.0);
+	//TODO: No random velocity
 	velocity = (axes[0] * getRandom(-2.f, 2.f)) + (axes[1] * 5.f) + (axes[2] * getRandom(-2.f, 2.f));
 	velocity = glm::normalize(velocity);
 	velocity *= 10.f;
@@ -378,6 +384,7 @@ void InitProjectileVariables(glm::mat3& axes, float& timeElapsed, glm::vec3& pos
 
 void mainLoop()
 {
+	int rockColor = 1;
 	nInput::gInputManager->ClearState();
 
 	nGraphics::Focus();
@@ -388,6 +395,7 @@ void mainLoop()
 	sCannonConfig cannonConfig;
 	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);
 
+	//TODO: Make cannon turn
 	float cannonYaw = 0.0f;
 	float cannonPitch = 0.0f;
 	float minYaw = cannonConfig.CannonDef.minYaw;
@@ -443,6 +451,7 @@ void mainLoop()
 		{
 			if (Key1->IsJustPressed())
 			{
+				rockColor = 1;
 				ReadConfigFromXML("BulletConfig.xml", projectileConfig);
 				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
 					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
@@ -454,6 +463,7 @@ void mainLoop()
 			}
 			else if (Key2->IsJustPressed())
 			{
+				rockColor = 2;
 				ReadConfigFromXML("LaserConfig.xml", projectileConfig);
 				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
 					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
@@ -465,6 +475,7 @@ void mainLoop()
 			}
 			else if (Key3->IsJustPressed())
 			{
+				rockColor = 3;
 				ReadConfigFromXML("CannonBallConfig.xml", projectileConfig);
 				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
 					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
@@ -475,7 +486,8 @@ void mainLoop()
 				inFlight = true;
 			}
 			else if (Key4->IsJustPressed())
-			{
+			{	
+				rockColor = 4;
 				ReadConfigFromXML("EnergyBallConfig.xml", projectileConfig);
 				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
 					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
@@ -579,7 +591,26 @@ void mainLoop()
 
 		planeGraphics->Render();
 		sphereGraphics->GetVars()->ModelMatrix = glm::translate(glm::mat4(1.0f), position);
+		//cannonGraphics->GetVars()->ModelMatrix = glm::rotateY(glm::vec3(0.f, 1.0f, 0.f),1.57f);
+		//TODO: Make colors work
+		if (rockColor == 1)
+		{
+			sphereGraphics->SetDiffuseTexture("blue.bmp",1.0f);
+		}
+		else if (rockColor == 2)
+		{
+
+		}
+		else if(rockColor ==3)
+		{
+
+		}
+		else if (rockColor == 4)
+		{
+
+		}
 		sphereGraphics->Render();
+		//cannonGraphics->SetMesh("rock1, rock2, rock 3?, rock 4?")
 		cannonGraphics->Render();
 		// end per-item rendering
 
