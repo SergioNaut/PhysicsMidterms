@@ -205,21 +205,13 @@ nGraphics::sPerFrameVars PerFrameVars;
 nGraphics::c3rdPersonCamera* camera = 0;
 nGraphics::cGraphicsComponent* skyboxGraphics;
 nGraphics::cGraphicsComponent* planeGraphics;
-nGraphics::cGraphicsComponent* sphereGraphics;
+nGraphics::cGraphicsComponent* rockGraphics;
 
 nGraphics::cGraphicsComponent* cannonGraphics;
 #pragma endregion
 
 int main()
 {
-#pragma region Tests
-	/*sConfig projectileConfig;
-	sCannonConfig cannonConfig;
-
-	ReadConfigFromXML("BulletConfig.xml", projectileConfig);
-	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);*/
-
-#pragma endregion
 #pragma region StuffFromProject1
 	camera = new nGraphics::c3rdPersonCamera();
 	nGraphics::SetCamera(camera);
@@ -258,12 +250,11 @@ int main()
 		loadingInfo.DoResize = false;
 		loadingInfo.AddSubMesh("skybox");
 		infos.push_back(loadingInfo);
-		// Lower poly sphere mesh for spheres
-		//loadingInfo.File = "../Assets/SoccerBall.obj";
+		// Lower poly Reck mesh for Projectiles
 		loadingInfo.File = "../Assets/rock.obj";
 		loadingInfo.DoResize = true;
 		loadingInfo.Extents = glm::vec3(1.f, 1.f, 1.f); // diameter 2 spheref
-		loadingInfo.SubMeshes[0].Name = "sphere";
+		loadingInfo.SubMeshes[0].Name = "rock";
 		infos.push_back(loadingInfo);
 		// Box mesh for planes and boxes
 		loadingInfo.File = "../Assets/box.obj";
@@ -293,14 +284,14 @@ int main()
 		skyboxGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 	}
 	{
-		// Sphere Graphics Component
+		// Rock Graphics Component
 		nGraphics::sGraphicsComponentDef graphicsDef;
-		graphicsDef.Mesh = "sphere";
-		graphicsDef.TexDiffuse = "white";
-		glm::set(graphicsDef.ModelColor, 1.0f, 1.0f, 1.0f, 1.0f);
+		graphicsDef.Mesh = "rock";
+		//graphicsDef.TexDiffuse = "white";
+		glm::set(graphicsDef.ModelColor, 0.0f, 0.0f, 0.0f, 0.0f);
 		glm::set(graphicsDef.Position, 0.0f, 1.0f, 0.0f);
 		glm::set(graphicsDef.Scale, 1.0f, 1.0f, 1.0f);
-		sphereGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
+		rockGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 	}
 	{
 		// Plane Graphics Component
@@ -319,7 +310,7 @@ int main()
 	graphicsDef.TexDiffuse = "white";
 	glm::set(graphicsDef.ModelColor, 0.0f, 0.0f, 0.0f, 1.0f);
 	glm::set(graphicsDef.Position, 0.5f, 0.0f, 0.5f);
-	glm::set(graphicsDef.Rotation, -1.57f, 0.0f, 0.0f);
+	glm::set(graphicsDef.Rotation, -1.57f, 0.f, -3.14f);
 	glm::set(graphicsDef.Scale, 20.f, 20.1f, 20.1f);
 	cannonGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 
@@ -328,7 +319,7 @@ int main()
 
 	// Clean up
 	delete planeGraphics;
-	delete sphereGraphics;
+	delete rockGraphics;
 	delete skyboxGraphics;
 	delete cannonGraphics;
 	delete camera;
@@ -342,24 +333,6 @@ int main()
 
  //TODO: Change So each type of projectile is created
  //TODO: MAKE CANNON ROTATION WORK
-void InitProject1Variables(glm::mat3& axes, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration)
-{
-	//TODO: Change the axes
-	axes = orthonormalBasis(getRandomXVector(), getRandomZVector());
-	// because our "sphere" has a radius of 1
-	position = glm::vec3(0.0, 1.1f, 0.0);
-	//TODO: No random velocity
-	velocity = (axes[0] * getRandom(-2.f, 2.f)) + (axes[1] * 5.f) + (axes[2] * getRandom(-2.f, 2.f));
-	velocity = glm::normalize(velocity);
-	velocity *= 10.f;
-
-	// Step 4: Define the acceleration due to gravity, and deltaTime.
-	acceleration = glm::vec3(0.f, -9.8f, 0.f);
-
-	// Step 5: Enter the main loop.
-	// Track the total elapsed simulation time.
-	timeElapsed = 0;
-}
 
 void InitProjectileVariables(glm::mat3& axes, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration,
 	float size, float muzzle, float gravity, /*take lifetime out?*/ float& lifetime)
@@ -367,7 +340,7 @@ void InitProjectileVariables(glm::mat3& axes, float& timeElapsed, glm::vec3& pos
 	axes = orthonormalBasis(getRandomXVector(), getRandomZVector());
 	//Added size so projectile won't get stuck on the ground
 	position = glm::vec3(0.0, size + size/10, 0.0);
-	velocity = (axes[0] * getRandom(-2.f, 2.f)) + (axes[1] * 5.f) + (axes[2] * getRandom(-2.f, 2.f));
+	velocity = glm::vec3(7.0f, 10.f, 0.f);
 	velocity = glm::normalize(velocity);
 	
 	//Added Muzzle to velocity
@@ -423,7 +396,7 @@ void mainLoop()
 	glm::vec3 velocity;
 	glm::vec3 acceleration;
 	float timeElapsed = 0;
-	InitProject1Variables(axes, timeElapsed, position, velocity, acceleration);
+	//InitProject1Variables(axes, timeElapsed, position, velocity, acceleration);
 	
 	particle->SetPosition(position);
 	particle->SetVelocity(velocity);
@@ -590,29 +563,31 @@ void mainLoop()
 		nGraphics::BeginFrame(PerFrameVars);
 
 		planeGraphics->Render();
-		sphereGraphics->GetVars()->ModelMatrix = glm::translate(glm::mat4(1.0f), position);
+		rockGraphics->GetVars()->ModelMatrix = glm::translate(glm::mat4(1.0f), position);
 		//cannonGraphics->GetVars()->ModelMatrix = glm::rotateY(glm::vec3(0.f, 1.0f, 0.f),1.57f);
 		//TODO: Make colors work
 		if (rockColor == 1)
 		{
-			sphereGraphics->SetDiffuseTexture("blue.bmp",1.0f);
+			//Gray bullet
+			glm::set(rockGraphics->GetVars()->ModelColor, 1.0f, 1.0f, 1.0f);
 		}
 		else if (rockColor == 2)
 		{
-
+			//Red laser
+			glm::set(rockGraphics->GetVars()->ModelColor, 1.0f, 0.0f, 0.0f);
 		}
 		else if(rockColor ==3)
 		{
-
+			//Black cannonball
+			glm::set(rockGraphics->GetVars()->ModelColor, 0.0f, 0.0f, 0.0f);
 		}
 		else if (rockColor == 4)
 		{
-
+			//Green energyball
+			glm::set(rockGraphics->GetVars()->ModelColor, 0.0f, 1.0f, 0.0f);
 		}
-		sphereGraphics->Render();
-		//cannonGraphics->SetMesh("rock1, rock2, rock 3?, rock 4?")
+		rockGraphics->Render();
 		cannonGraphics->Render();
-		// end per-item rendering
 
 		nGraphics::EndFrame();
 
