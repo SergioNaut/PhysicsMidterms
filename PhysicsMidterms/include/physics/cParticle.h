@@ -17,9 +17,7 @@ namespace nPhysics
 		float mInverseMass;
 		// Externally applied forces accumulated during a time step
 		glm::vec3 mAppliedForce;
-		// Damping is applied to linear motion
-		// Required to remove energy added through numerical instability of integration
-		// Also generally used as an overall "friction" for the particle
+		//TO DO: Use Damping?
 		float mDamping;
 	public:
 		cParticle(float mass, const glm::vec3& position);

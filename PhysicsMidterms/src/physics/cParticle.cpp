@@ -116,7 +116,7 @@ namespace nPhysics
 	{
 		if (mInverseMass == 0.f)
 		{
-			return; // static things don't move!
+			return;
 		}
 
 		mPosition += mVelocity * deltaTime;

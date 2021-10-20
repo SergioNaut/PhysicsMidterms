@@ -101,7 +101,7 @@ namespace nGraphics
 	{
 		if (!glfwInit())
 		{
-			std::cout << "couldn't initialize glfw :(" << std::endl;
+			std::cout << "Error initializinh GLFW" << std::endl;
 			return false;
 		}
 		glfwWindowHint(GLFW_SAMPLES, 4);
@@ -113,10 +113,9 @@ namespace nGraphics
 		// Open a window and create its OpenGL context
 		int initWidth = 1024;
 		int initHeight = 768;
-		gWindow = glfwCreateWindow(initWidth, initHeight, "SuperWindow", NULL, NULL);
+		gWindow = glfwCreateWindow(initWidth, initHeight, "Cannon Test", NULL, NULL);
 		if (gWindow == NULL)
 		{
-			std::cout << "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible." << std::endl;
 			glfwTerminate();
 			return false;
 		}
@@ -162,8 +161,8 @@ namespace nGraphics
 		glfwSetWindowSizeCallback(gWindow, Callback_WindowResize);
 		glfwPollEvents();
 
-		// Black background
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		// Sky Blue background
+		glClearColor(0.53f, 0.81f, 0.92f, 0.0f);
 
 		// Enable depth test
 		glEnable(GL_DEPTH_TEST);

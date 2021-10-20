@@ -174,8 +174,6 @@ bool ReadCannonConfigFromXML(const std::string& filePath, sCannonConfig& configO
 
 #pragma region BitsfromProject1
 
-//Not Sure if I`ll need any random bits
-
 // Generate a random number between 0 and 1
 float getRandom();
 
@@ -196,13 +194,6 @@ glm::vec3 getRandomZVector();
 // Determine from the parameters if the particle is currently above the ground.
 bool particleIsAboveGround(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration);
 
-// Determine from the parameters if the particle is currently moving "up".
-bool particleIsMovingUpward(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration);
-
-// Perform one single time-step implementing Euler Integration.
-void doTimeStepEuler(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration);
-// Perform one single time-step implementing Midpoint Integration.
-void doTimeStepMidpoint(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration);
 
 glm::mat3 orthonormalBasis(const glm::vec3& xVec, const glm::vec3& zVec);
 
@@ -215,22 +206,19 @@ nGraphics::c3rdPersonCamera* camera = 0;
 nGraphics::cGraphicsComponent* skyboxGraphics;
 nGraphics::cGraphicsComponent* planeGraphics;
 nGraphics::cGraphicsComponent* sphereGraphics;
+
+nGraphics::cGraphicsComponent* cannonGraphics;
 #pragma endregion
 
 int main()
 {
 #pragma region Tests
-	sConfig projectileConfig;
+	/*sConfig projectileConfig;
 	sCannonConfig cannonConfig;
 
 	ReadConfigFromXML("BulletConfig.xml", projectileConfig);
-	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);
+	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);*/
 
-	/*std::cout << projectileConfig.ProjectileDef.gravity  << std::endl;
-	std::cout << cannonConfig.CannonDef.maxYaw << std::endl;
-
-	float gravity = projectileConfig.ProjectileDef.gravity;
-	std::cout << gravity;*/
 #pragma endregion
 #pragma region StuffFromProject1
 	camera = new nGraphics::c3rdPersonCamera();
@@ -240,23 +228,24 @@ int main()
 
 	if (!nGraphics::Init())
 	{
-		std::cout << "booo graphics didn't start up right" << std::endl;
+		std::cout << "Error Setting up Graphics" << std::endl;
 		system("pause");
 		return -1;
 	}
 	if (!nInput::Init())
 	{
-		std::cout << "booo inputs didn't start up right" << std::endl;
+		std::cout << "Error Setting up inputs" << std::endl;
 		system("pause");
 		return -1;
 	}
 
 	{
 		// Loading textures to use with our meshes
-		nGraphics::gTextureManager->Load("../Assets/skybox/tidepool", "skybox", true);
+		//nGraphics::gTextureManager->Load("../Assets/skybox/tidepool", "skybox", true);
 		nGraphics::gTextureManager->Load("../Assets/WhiteSquare.bmp", "whiteSquare", false);
 		nGraphics::gTextureManager->Load("../Assets/stone_wall.bmp", "stone", false);
-		nGraphics::gTextureManager->Load("../Assets/grass.bmp", "grass", false);
+		nGraphics::gTextureManager->Load("../Assets/grafitti.bmp", "grafitti", false);
+		nGraphics::gTextureManager->Load("../Assets/white.bmp", "white", false);
 	}
 
 	{
@@ -270,9 +259,10 @@ int main()
 		loadingInfo.AddSubMesh("skybox");
 		infos.push_back(loadingInfo);
 		// Lower poly sphere mesh for spheres
-		loadingInfo.File = "../Assets/SoccerBall.obj";
+		//loadingInfo.File = "../Assets/SoccerBall.obj";
+		loadingInfo.File = "../Assets/rock.obj";
 		loadingInfo.DoResize = true;
-		loadingInfo.Extents = glm::vec3(2.f, 2.f, 2.f); // diameter 2 spheref
+		loadingInfo.Extents = glm::vec3(1.f, 1.f, 1.f); // diameter 2 spheref
 		loadingInfo.SubMeshes[0].Name = "sphere";
 		infos.push_back(loadingInfo);
 		// Box mesh for planes and boxes
@@ -282,9 +272,16 @@ int main()
 		loadingInfo.SubMeshes[0].Name = "box";
 		infos.push_back(loadingInfo);
 
+		//Cannon
+		loadingInfo.File = "../Assets/Cannon.obj";
+		loadingInfo.DoResize = true;
+		loadingInfo.Extents = glm::vec3(0.1f, 0.1f, 0.1f);
+		loadingInfo.SubMeshes[0].Name = "cannon";
+		infos.push_back(loadingInfo);
+
 		if (!nGraphics::gMeshManager->Load(infos))
 		{
-			std::cout << "booooo failed to load meshes" << std::endl;
+			std::cout << "Error loading meshes" << std::endl;
 			return -1;
 		}
 	}
@@ -293,18 +290,13 @@ int main()
 	{
 		// Skybox Graphics Component
 		nGraphics::sGraphicsComponentDef graphicsDef;
-		graphicsDef.Mesh = "skybox";
-		graphicsDef.TexCubeMap = "skybox";
-		glm::set(graphicsDef.ModelColor, 1.0f, 1.0f, 1.0f, 1.0f);
-		glm::set(graphicsDef.Position, 0.0f, 0.0f, 0.0f);
-		glm::set(graphicsDef.Scale, 500.0f, 500.0f, 500.0f);
 		skyboxGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 	}
 	{
 		// Sphere Graphics Component
 		nGraphics::sGraphicsComponentDef graphicsDef;
 		graphicsDef.Mesh = "sphere";
-		graphicsDef.TexDiffuse = "stone";
+		graphicsDef.TexDiffuse = "white";
 		glm::set(graphicsDef.ModelColor, 1.0f, 1.0f, 1.0f, 1.0f);
 		glm::set(graphicsDef.Position, 0.0f, 1.0f, 0.0f);
 		glm::set(graphicsDef.Scale, 1.0f, 1.0f, 1.0f);
@@ -314,13 +306,19 @@ int main()
 		// Plane Graphics Component
 		nGraphics::sGraphicsComponentDef graphicsDef;
 		graphicsDef.Mesh = "box";
-		graphicsDef.TexDiffuse = "grass";
+		graphicsDef.TexDiffuse = "grafitti";
 		glm::set(graphicsDef.ModelColor, 1.0f, 1.0f, 1.0f, 1.0f);
 		glm::set(graphicsDef.Position, 0.0f, -0.2f, 0.0f);
 		glm::set(graphicsDef.Scale, 10.0f, 0.2f, 10.0f);
 		planeGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 	}
-
+		//Cannon
+	nGraphics::sGraphicsComponentDef graphicsDef;
+	graphicsDef.Mesh = "cannon";
+	glm::set(graphicsDef.ModelColor, 1.0f, 1.0f, 1.0f, 1.0f);
+	glm::set(graphicsDef.Position, 0.0f, 1.0f, 0.0f);
+	glm::set(graphicsDef.Scale, 20.f, 20.1f, 20.1f);
+	cannonGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 
 	// Enter the main loop
 	mainLoop();
@@ -329,6 +327,7 @@ int main()
 	delete planeGraphics;
 	delete sphereGraphics;
 	delete skyboxGraphics;
+	delete cannonGraphics;
 	delete camera;
 
 	nGraphics::Shutdown();
@@ -387,24 +386,28 @@ void mainLoop()
 	sConfig projectileConfig;
 	//Setup cannon
 	sCannonConfig cannonConfig;
+	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);
 
+	float cannonYaw = 0.0f;
+	float cannonPitch = 0.0f;
+	float minYaw = cannonConfig.CannonDef.minYaw;
+	float maxYaw = cannonConfig.CannonDef.maxYaw;
+	float minPitch = cannonConfig.CannonDef.minPitch;
+	float maxPitch = cannonConfig.CannonDef.maxPitch;
 	bool continueMainLoop = true;
 
 	float previousTime = static_cast<float>(glfwGetTime());
 
-	float fpsFrameCount = 0.f;
-	float fpsTimeElapsed = 0.f;
-
-	// BEGIN PROJECT 1 SETUP
+	//World Setup
 	nPhysics::cParticleWorld* world = new nPhysics::cParticleWorld();
 	nPhysics::cParticle* particle = new nPhysics::cParticle(1.0f, glm::vec3(0.f));
 	if (world->AddParticle(particle))
 	{
-		std::cout << "Hurray!" << std::endl;
+		std::cout << "Particle Added!" << std::endl;
 	}
 	else
 	{
-		bool sexybreakpoint = true;
+		std::cout << "Error adding particle." << std::endl;
 	}
 	glm::mat3 axes;
 
@@ -413,14 +416,12 @@ void mainLoop()
 	glm::vec3 acceleration;
 	float timeElapsed = 0;
 	InitProject1Variables(axes, timeElapsed, position, velocity, acceleration);
+	
 	particle->SetPosition(position);
 	particle->SetVelocity(velocity);
 	particle->SetAcceleration(acceleration);
 	bool inFlight = false;
-	// END PROJECT 1 SETUP
-
 #pragma region Keys
-	nInput::cKey* spaceKey = nInput::cInputManager::GetInstance()->ListenToKey(nInput::KeyCode::KEY_SPACE);
 	nInput::cKey* Key1 = nInput::cInputManager::GetInstance()->ListenToKey(nInput::KeyCode::KEY_1);
 	nInput::cKey* Key2 = nInput::cInputManager::GetInstance()->ListenToKey(nInput::KeyCode::KEY_2);
 	nInput::cKey* Key3 = nInput::cInputManager::GetInstance()->ListenToKey(nInput::KeyCode::KEY_3);
@@ -436,38 +437,11 @@ void mainLoop()
 		float currentTime = static_cast<float>(glfwGetTime());
 		float deltaTime = currentTime - previousTime;
 		previousTime = currentTime;
+		
 
-#pragma region FPSPrinter
-		// FPS TITLE STUFF
-		{
-			fpsTimeElapsed += deltaTime;
-			fpsFrameCount += 1.0f;
-			if (fpsTimeElapsed >= 0.03f)
-			{
-				std::string fps = std::to_string(fpsFrameCount / fpsTimeElapsed);
-				std::string ms = std::to_string(1000.f * fpsTimeElapsed / fpsFrameCount);
-				std::string newTitle = "FPS: " + fps + "   MS: " + ms;
-				nGraphics::SetWindowTitle(newTitle);
-				// reset times and counts
-				fpsTimeElapsed = 0.f;
-				fpsFrameCount = 0.f;
-			}
-		}
-#pragma endregion
-
-		// TODO: update inputs/controls/physics
-		// Continue the simulation so long as the particle is above the ground.
 		if (!inFlight)
 		{
-			if (spaceKey->IsJustPressed())
-			{
-				InitProject1Variables(axes, timeElapsed, position, velocity, acceleration);
-				particle->SetPosition(position);
-				particle->SetVelocity(velocity);
-				particle->SetAcceleration(acceleration);
-				inFlight = true;
-			}
-			else if (Key1->IsJustPressed())
+			if (Key1->IsJustPressed())
 			{
 				ReadConfigFromXML("BulletConfig.xml", projectileConfig);
 				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
@@ -511,6 +485,55 @@ void mainLoop()
 				particle->SetAcceleration(acceleration);
 				inFlight = true;
 			}
+			else if (wKey->IsJustPressed())
+			{
+				if (cannonPitch < maxPitch)
+				{
+					cannonPitch += 0.5f;
+					
+				}
+				if (cannonPitch > maxPitch)
+				{
+					cannonPitch = maxPitch;
+				}
+				std::cout << cannonPitch << std::endl;
+			}
+			else if (aKey->IsJustPressed())
+			{
+				if (cannonYaw > minYaw)
+				{
+					cannonYaw -= 0.05f;
+				}
+				if (cannonYaw < minYaw)
+				{
+					cannonYaw = minYaw;
+				}
+				std::cout << cannonYaw << std::endl;
+			}
+			else if (sKey->IsJustPressed())
+			{
+				if (cannonPitch > minPitch)
+				{
+					cannonPitch -= 0.5f;
+				}
+				if (cannonPitch < minPitch)
+				{
+					cannonPitch = minPitch;
+				}
+				std::cout << cannonPitch << std::endl;
+			}
+			else if (dKey->IsJustPressed())
+			{
+				if (cannonYaw < maxYaw)
+				{
+					cannonYaw += 0.05f;
+				}
+				if (cannonYaw > maxYaw)
+				{
+					cannonYaw = maxYaw;
+				}
+				std::cout << cannonYaw << std::endl;
+			}
 		}
 
 		particle->GetPosition(position);
@@ -521,29 +544,20 @@ void mainLoop()
 		{
 			if (particleIsAboveGround(axes, deltaTime, timeElapsed, position, velocity, acceleration))
 			{
-				if (particleIsMovingUpward(axes, deltaTime, timeElapsed, position, velocity, acceleration))
-				{
-					// Let the user know the particle is moving up.
-					std::cout << "going up! \tx=" << position.x << "\ty=" << position.y << "\tz=" << position.z << std::endl;
-				}
-				else
-				{
-					// Let the user know the particle is moving down.
-					std::cout << "going down! \tx=" << position.x << "\ty=" << position.y << "\tz=" << position.z << std::endl;
-				}
 				world->TimeStep(deltaTime);
-				// Step the simulation forward
-				//doTimeStepEuler(axes, deltaTime, timeElapsed, position, velocity, acceleration);
-				//doTimeStepMidpoint(axes, deltaTime, timeElapsed, position, velocity, acceleration);
+				projectileConfig.ProjectileDef.lifetime--;
+				if (projectileConfig.ProjectileDef.lifetime <=0)
+				{
+					inFlight = false;
+				}
 			}
 			else
 			{
-				std::cout << "Impacted after " << timeElapsed << " seconds with a velocity x=" << velocity.x << "\ty=" << velocity.y << "\tz=" << velocity.z << std::endl;
 				inFlight = false;
+				std::cout << "It`s done" << std::endl;
 			}
 		}
 
-		// Safety, mostly for first frame
 		if (deltaTime == 0.f)
 		{
 			deltaTime = 0.03f;
@@ -563,11 +577,10 @@ void mainLoop()
 
 		nGraphics::BeginFrame(PerFrameVars);
 
-		// begin per-item rendering
-		skyboxGraphics->Render();
 		planeGraphics->Render();
 		sphereGraphics->GetVars()->ModelMatrix = glm::translate(glm::mat4(1.0f), position);
 		sphereGraphics->Render();
+		cannonGraphics->Render();
 		// end per-item rendering
 
 		nGraphics::EndFrame();
