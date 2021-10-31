@@ -12,7 +12,7 @@ namespace nGraphics
 		InvertPitch = false;
 		ZoomSpeed = 50.f;
 		MinDistance = 2.f;
-		Distance = 87.f;
+		Distance = 30.f;
 		MaxDistance = 100.f;
 		Yaw = 0.f;
 		MinYaw = -0.7f;

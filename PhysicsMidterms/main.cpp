@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <math.h>
 
 //XML
 #include <rapidxml/rapidxml.hpp>
@@ -14,6 +15,7 @@
 #include <graphics/cameras/c3rdPersonCamera.h>
 #include <graphics/cGraphicsComponent.h>
 #include <physics/cParticleWorld.h>
+#include<physics/cProjectile.h>
 
 
 #pragma region GenericXMLstuff
@@ -41,69 +43,74 @@ bool SetValue(rapidxml::xml_attribute<>* valueIn, float& valueOut)
 
 #pragma region ProjectileStuff
 
-struct sProjectileDef
-{
-	float size;
-	float mass;
-	float muzzle;
-	float gravity;
-	float lifetime;
-};
+//struct sProjectileDef
+//{
+//	float size;
+//	float mass;
+//	float muzzle;
+//	float gravity;
+//	float lifetime;
+//};
 
-struct sConfig
-{
-	sProjectileDef ProjectileDef;
-};
+nPhysics::sProjectileDef bulletDef;
+nPhysics::sProjectileDef cannonBallDef;
+nPhysics::sProjectileDef laserDef;
+nPhysics::sProjectileDef energyBallDef;
 
-bool ParseProjectileDef(rapidxml::xml_node<>* valueIn, sProjectileDef& valueOut)
-{
-	if (!valueIn)
-	{
-		return false;
-	}
-	bool result = true;
-	result &= SetValue(valueIn->first_attribute("size"), valueOut.size);
-	result &= SetValue(valueIn->first_attribute("mass"), valueOut.mass);
-	result &= SetValue(valueIn->first_attribute("muzzle"), valueOut.muzzle);
-	result &= SetValue(valueIn->first_attribute("gravity"), valueOut.gravity);
-	result &= SetValue(valueIn->first_attribute("lifetime"), valueOut.lifetime);
-
-	return result;
-}
-
-bool ParseConfig(rapidxml::xml_node<>* valueIn, sConfig& valueOut)
-{
-	if (!valueIn)
-	{
-		return false;
-	}
-	bool result = true;
-	result &= ParseProjectileDef(valueIn->first_node("Data"), valueOut.ProjectileDef);
-	return result;
-}
-
-bool ReadConfigFromXML(const std::string& filePath, sConfig& configOut)
-{
-	//Seems really dumb but that`s how it`s working
-	std::ifstream i(filePath);
-
-	using namespace rapidxml;
-
-	// load the file
-	//file<>* xmlFile = new file<>("BulletConfig.xml");
-	//file<>* xmlFile = new file<>(filePath);
-	file<>* xmlFile = new file<>(i);
-
-	xml_document<>* doc = new xml_document<>;    // character type defaults to char
-	doc->parse<0>(xmlFile->data());// 0 means default parse flags
-
-	bool result = ParseConfig(doc->first_node("Config"), configOut);
-
-	delete xmlFile;
-	delete doc;
-
-	return result;
-}
+//struct sConfig
+//{
+//	nPhysics::sProjectileDef ProjectileDef;
+//};
+//
+//bool ParseProjectileDef(rapidxml::xml_node<>* valueIn, nPhysics::sProjectileDef& valueOut)
+//{
+//	if (!valueIn)
+//	{
+//		return false;
+//	}
+//	bool result = true;
+//	result &= SetValue(valueIn->first_attribute("size"), valueOut.size);
+//	result &= SetValue(valueIn->first_attribute("mass"), valueOut.mass);
+//	result &= SetValue(valueIn->first_attribute("muzzle"), valueOut.muzzle);
+//	result &= SetValue(valueIn->first_attribute("gravity"), valueOut.gravity);
+//	result &= SetValue(valueIn->first_attribute("lifetime"), valueOut.lifetime);
+//
+//	return result;
+//}
+//
+//bool ParseConfig(rapidxml::xml_node<>* valueIn, sConfig& valueOut)
+//{
+//	if (!valueIn)
+//	{
+//		return false;
+//	}
+//	bool result = true;
+//	result &= ParseProjectileDef(valueIn->first_node("Data"), valueOut.ProjectileDef);
+//	return result;
+//}
+//
+//bool ReadConfigFromXML(const std::string& filePath, sConfig& configOut)
+//{
+//	//Seems really dumb but that`s how it`s working
+//	std::ifstream i(filePath);
+//
+//	using namespace rapidxml;
+//
+//	// load the file
+//	//file<>* xmlFile = new file<>("BulletConfig.xml");
+//	//file<>* xmlFile = new file<>(filePath);
+//	file<>* xmlFile = new file<>(i);
+//
+//	xml_document<>* doc = new xml_document<>;    // character type defaults to char
+//	doc->parse<0>(xmlFile->data());// 0 means default parse flags
+//
+//	bool result = ParseConfig(doc->first_node("Config"), configOut);
+//
+//	delete xmlFile;
+//	delete doc;
+//
+//	return result;
+//}
 #pragma endregion
 
 #pragma region CannonStuff
@@ -155,9 +162,6 @@ bool ReadCannonConfigFromXML(const std::string& filePath, sCannonConfig& configO
 
 	using namespace rapidxml;
 
-	// load the file
-	//file<>* xmlFile = new file<>("BulletConfig.xml");
-	//file<>* xmlFile = new file<>(filePath);
 	file<>* xmlFile = new file<>(i);
 
 	xml_document<>* doc = new xml_document<>;    // character type defaults to char
@@ -174,28 +178,7 @@ bool ReadCannonConfigFromXML(const std::string& filePath, sCannonConfig& configO
 
 #pragma region BitsfromProject1
 
-// Generate a random number between 0 and 1
-float getRandom();
-
-// Generate a random number between zero and a given high value
-float getRandom(float high);
-
-// Generate a random number in a given range
-float getRandom(float low, float high);
-
-// Returns a vector laying on the x-z plane, randomized in direction and magnitude.
-// The output is designed to be linearly independent from the output of getRandomZVector()
-glm::vec3 getRandomXVector();
-
-// Returns a vector laying on the x-z plane, randomized in direction and magnitude.
-// The output is designed to be linearly independent from the output of getRandomXVector()
-glm::vec3 getRandomZVector();
-
-// Determine from the parameters if the particle is currently above the ground.
-bool particleIsAboveGround(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration);
-
-
-glm::mat3 orthonormalBasis(const glm::vec3& xVec, const glm::vec3& zVec);
+bool particleIsAboveGround(glm::vec3& position);
 
 void mainLoop();
 #pragma endregion
@@ -212,6 +195,56 @@ nGraphics::cGraphicsComponent* cannonGraphics;
 
 int main()
 {
+#pragma region ProjectileSetups
+	//Not using the data from the xml files currently
+	
+	//Bullet
+	bulletDef.Acceleration = glm::vec3(0.0f, -9.8f, 0.0f);
+	bulletDef.EnergyAcceleration = 0.0f;
+	bulletDef.Speed = 25.0f;
+	bulletDef.Position = glm::vec3(0.f);
+	bulletDef.Damping = 0.95f;
+	bulletDef.Mass = 20.0f;
+	bulletDef.Radius = 1.5f;
+	bulletDef.Colour = glm::vec4(1.f, 0.2f, 0.2f, 1.0f);
+	bulletDef.GroundHeight = 0.0f;
+
+	//Laser
+	laserDef.Acceleration = glm::vec3(0.0f, -9.8f, 0.0f);
+	laserDef.EnergyAcceleration = 0.0f;
+	laserDef.Speed = 25.0f;
+	laserDef.Position = glm::vec3(0.f);
+	laserDef.Damping = 0.95f;
+	laserDef.Mass = 20.0f;
+	laserDef.Radius = 1.5f;
+	laserDef.Colour = glm::vec4(1.f, 0.2f, 0.2f, 1.0f);
+	laserDef.GroundHeight = 0.0f;
+
+	//CannonBall
+	cannonBallDef.Acceleration = glm::vec3(0.0f, -9.8f, 0.0f);
+	cannonBallDef.EnergyAcceleration = 0.0f;
+	cannonBallDef.Speed = 25.0f;
+	cannonBallDef.Position = glm::vec3(0.f);
+	cannonBallDef.Damping = 0.95f;
+	cannonBallDef.Mass = 20.0f;
+	cannonBallDef.Radius = 1.5f;
+	cannonBallDef.Colour = glm::vec4(1.f, 0.2f, 0.2f, 1.0f);
+	cannonBallDef.GroundHeight = 0.0f;
+
+	//EnergyBall
+	energyBallDef.Acceleration = glm::vec3(0.0f, -9.8f, 0.0f);
+	energyBallDef.EnergyAcceleration = 0.0f;
+	energyBallDef.Speed = 25.0f;
+	energyBallDef.Position = glm::vec3(0.f);
+	energyBallDef.Damping = 0.95f;
+	energyBallDef.Mass = 20.0f;
+	energyBallDef.Radius = 1.5f;
+	energyBallDef.Colour = glm::vec4(1.f, 0.2f, 0.2f, 1.0f);
+	energyBallDef.GroundHeight = 0.0f;
+
+#pragma endregion
+
+
 #pragma region StuffFromProject1
 	camera = new nGraphics::c3rdPersonCamera();
 	nGraphics::SetCamera(camera);
@@ -287,7 +320,6 @@ int main()
 		// Rock Graphics Component
 		nGraphics::sGraphicsComponentDef graphicsDef;
 		graphicsDef.Mesh = "rock";
-		//graphicsDef.TexDiffuse = "white";
 		glm::set(graphicsDef.ModelColor, 0.0f, 0.0f, 0.0f, 0.0f);
 		glm::set(graphicsDef.Position, 0.0f, 1.0f, 0.0f);
 		glm::set(graphicsDef.Scale, 1.0f, 1.0f, 1.0f);
@@ -304,13 +336,12 @@ int main()
 		planeGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 	}
 	//Cannon
-	//TO DO: Change texture to black
 	nGraphics::sGraphicsComponentDef graphicsDef;
 	graphicsDef.Mesh = "cannon";
 	graphicsDef.TexDiffuse = "white";
 	glm::set(graphicsDef.ModelColor, 0.0f, 0.0f, 0.0f, 1.0f);
 	glm::set(graphicsDef.Position, 0.5f, 0.0f, 0.5f);
-	glm::set(graphicsDef.Rotation, -1.57f, 0.f, -3.14f);
+	glm::set(graphicsDef.Rotation, -1.57f, 0.f, 0.f);
 	glm::set(graphicsDef.Scale, 20.f, 20.1f, 20.1f);
 	cannonGraphics = new nGraphics::cGraphicsComponent(graphicsDef);
 
@@ -331,16 +362,31 @@ int main()
 #pragma endregion
  }
 
- //TODO: Change So each type of projectile is created
  //TODO: MAKE CANNON ROTATION WORK
+ glm::mat3 yawMatrix(float yaw)
+ {
+	 return glm::mat3(cos(yaw), sin(yaw), 0, -sin(yaw), cos(yaw), 0, 0, 0, 1);
+ }
 
-void InitProjectileVariables(glm::mat3& axes, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration,
-	float size, float muzzle, float gravity, /*take lifetime out?*/ float& lifetime)
-{	//Axes Becomes the cannon values?
-	axes = orthonormalBasis(getRandomXVector(), getRandomZVector());
+ glm::mat3 pitchMatrix(float pitch)
+ {
+	 return glm::mat3(cos(pitch), 0, -sin(pitch), 0, 1, 0, sin(pitch), 0, cos(pitch));
+ }
+
+ glm::mat3 rotationMatrix(float yaw, float pitch)
+ {
+	 return yawMatrix(yaw) * pitchMatrix(pitch);
+ }
+
+
+void InitProjectileVariables(float yaw, float pitch, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration,
+	float size, float muzzle, float gravity)
+{
+	glm::mat3 rotMat = rotationMatrix(yaw, pitch);
 	//Added size so projectile won't get stuck on the ground
-	position = glm::vec3(0.0, size + size/10, 0.0);
-	velocity = glm::vec3(7.0f, 10.f, 0.f);
+	position = glm::vec3(0.0, size , 0.0);
+	//velocity = glm::vec3(7.0f, 10.f, 0.f);
+	velocity = glm::vec3((rotMat[0]*7.0f)+(rotMat[1]* 10.f)+ (rotMat[2] * 0.f));
 	velocity = glm::normalize(velocity);
 	
 	//Added Muzzle to velocity
@@ -350,8 +396,6 @@ void InitProjectileVariables(glm::mat3& axes, float& timeElapsed, glm::vec3& pos
 	acceleration = glm::vec3(0.f, -9.8f*gravity, 0.f);
 
 	// Step 5: Enter the main loop.
-	// Track the total elapsed simulation time.
-	timeElapsed = 0;
 }
 
 
@@ -362,27 +406,32 @@ void mainLoop()
 
 	nGraphics::Focus();
 
+	bool continueMainLoop = true;
+
 	//Setup projectile
-	sConfig projectileConfig;
+	//sConfig projectileConfig;
 	//Setup cannon
 	sCannonConfig cannonConfig;
 	ReadCannonConfigFromXML("CannonConfig.xml", cannonConfig);
 
-	//TODO: Make cannon turn
-	float cannonYaw = 0.0f;
-	float cannonPitch = 0.0f;
+	//TODO: Make cannon turn grafically
+	
+	float cannonYaw = 0.3f;
+	float cannonPitch = 10.0f;
+	float* pCannonYaw = &cannonYaw;
+	float* pCannonPitch = &cannonPitch;
 	float minYaw = cannonConfig.CannonDef.minYaw;
 	float maxYaw = cannonConfig.CannonDef.maxYaw;
 	float minPitch = cannonConfig.CannonDef.minPitch;
 	float maxPitch = cannonConfig.CannonDef.maxPitch;
-	bool continueMainLoop = true;
 
 	float previousTime = static_cast<float>(glfwGetTime());
 
 	//World Setup
+	std::vector<nPhysics::cProjectile*> projectiles;
 	nPhysics::cParticleWorld* world = new nPhysics::cParticleWorld();
-	nPhysics::cParticle* particle = new nPhysics::cParticle(1.0f, glm::vec3(0.f));
-	if (world->AddParticle(particle))
+	//nPhysics::cParticle* particle = new nPhysics::cParticle(1.0f, glm::vec3(0.f));
+	/*if (world->AddParticle(particle))
 	{
 		std::cout << "Particle Added!" << std::endl;
 	}
@@ -396,12 +445,11 @@ void mainLoop()
 	glm::vec3 velocity;
 	glm::vec3 acceleration;
 	float timeElapsed = 0;
-	//InitProject1Variables(axes, timeElapsed, position, velocity, acceleration);
 	
 	particle->SetPosition(position);
 	particle->SetVelocity(velocity);
 	particle->SetAcceleration(acceleration);
-	bool inFlight = false;
+	bool inFlight = false;*/
 #pragma region Keys
 	nInput::cKey* Key1 = nInput::cInputManager::GetInstance()->ListenToKey(nInput::KeyCode::KEY_1);
 	nInput::cKey* Key2 = nInput::cInputManager::GetInstance()->ListenToKey(nInput::KeyCode::KEY_2);
@@ -419,135 +467,104 @@ void mainLoop()
 		float deltaTime = currentTime - previousTime;
 		previousTime = currentTime;
 		
-
-		if (!inFlight)
-		{
-			if (Key1->IsJustPressed())
-			{
-				rockColor = 1;
-				ReadConfigFromXML("BulletConfig.xml", projectileConfig);
-				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
-					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
-				particle->SetMass(projectileConfig.ProjectileDef.mass);
-				particle->SetPosition(position);
-				particle->SetVelocity(velocity);
-				particle->SetAcceleration(acceleration);
-				inFlight = true;
-			}
-			else if (Key2->IsJustPressed())
-			{
-				rockColor = 2;
-				ReadConfigFromXML("LaserConfig.xml", projectileConfig);
-				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
-					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
-				particle->SetMass(projectileConfig.ProjectileDef.mass);
-				particle->SetPosition(position);
-				particle->SetVelocity(velocity);
-				particle->SetAcceleration(acceleration);
-				inFlight = true;
-			}
-			else if (Key3->IsJustPressed())
-			{
-				rockColor = 3;
-				ReadConfigFromXML("CannonBallConfig.xml", projectileConfig);
-				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
-					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
-				particle->SetMass(projectileConfig.ProjectileDef.mass);
-				particle->SetPosition(position);
-				particle->SetVelocity(velocity);
-				particle->SetAcceleration(acceleration);
-				inFlight = true;
-			}
-			else if (Key4->IsJustPressed())
-			{	
-				rockColor = 4;
-				ReadConfigFromXML("EnergyBallConfig.xml", projectileConfig);
-				InitProjectileVariables(axes, timeElapsed, position, velocity, acceleration,
-					projectileConfig.ProjectileDef.size, projectileConfig.ProjectileDef.muzzle, projectileConfig.ProjectileDef.gravity, /*take lifetime out?*/ projectileConfig.ProjectileDef.lifetime);
-				particle->SetMass(projectileConfig.ProjectileDef.mass);
-				particle->SetPosition(position);
-				particle->SetVelocity(velocity);
-				particle->SetAcceleration(acceleration);
-				inFlight = true;
-			}
-			else if (wKey->IsJustPressed())
-			{
-				if (cannonPitch < maxPitch)
-				{
-					cannonPitch += 0.5f;
-					
-				}
-				if (cannonPitch > maxPitch)
-				{
-					cannonPitch = maxPitch;
-				}
-				std::cout << cannonPitch << std::endl;
-			}
-			else if (aKey->IsJustPressed())
-			{
-				if (cannonYaw > minYaw)
-				{
-					cannonYaw -= 0.05f;
-				}
-				if (cannonYaw < minYaw)
-				{
-					cannonYaw = minYaw;
-				}
-				std::cout << cannonYaw << std::endl;
-			}
-			else if (sKey->IsJustPressed())
-			{
-				if (cannonPitch > minPitch)
-				{
-					cannonPitch -= 0.5f;
-				}
-				if (cannonPitch < minPitch)
-				{
-					cannonPitch = minPitch;
-				}
-				std::cout << cannonPitch << std::endl;
-			}
-			else if (dKey->IsJustPressed())
-			{
-				if (cannonYaw < maxYaw)
-				{
-					cannonYaw += 0.05f;
-				}
-				if (cannonYaw > maxYaw)
-				{
-					cannonYaw = maxYaw;
-				}
-				std::cout << cannonYaw << std::endl;
-			}
-		}
-
-		particle->GetPosition(position);
-		particle->GetVelocity(velocity);
-		particle->GetAcceleration(acceleration);
-
-		if (inFlight)
-		{
-			if (particleIsAboveGround(axes, deltaTime, timeElapsed, position, velocity, acceleration))
-			{
-				world->TimeStep(deltaTime);
-				projectileConfig.ProjectileDef.lifetime--;
-				if (projectileConfig.ProjectileDef.lifetime <=0)
-				{
-					inFlight = false;
-				}
-			}
-			else
-			{
-				inFlight = false;
-				std::cout << "It`s done" << std::endl;
-			}
-		}
+		world->TimeStep(deltaTime);
 
 		if (deltaTime == 0.f)
 		{
 			deltaTime = 0.03f;
 		}
 
+		
+		if (aKey->IsJustPressed())
+		{
+			if (cannonPitch < maxPitch)
+			{
+				cannonPitch += 1.0f;
+
+			}
+			if (cannonPitch > maxPitch)
+			{
+				cannonPitch = maxPitch;
+			}
+			std::cout << cannonPitch << std::endl;
+		}
+		if (sKey->IsJustPressed())
+		{
+			if (cannonYaw > minYaw)
+			{
+				cannonYaw -= 0.3f;
+			}
+			if (cannonYaw < minYaw)
+			{
+				cannonYaw = minYaw;
+			}
+			std::cout << cannonYaw << std::endl;
+		}
+		if (dKey->IsJustPressed())
+		{
+			if (cannonPitch > minPitch)
+			{
+				cannonPitch -= 1.0f;
+			}
+			if (cannonPitch < minPitch)
+			{
+				cannonPitch = minPitch;
+			}
+			std::cout << cannonPitch << std::endl;
+		}
+		if (wKey->IsJustPressed())
+		{
+			if (cannonYaw < maxYaw)
+			{
+				cannonYaw += 0.3f;
+			}
+			if (cannonYaw > maxYaw)
+			{
+				cannonYaw = maxYaw;
+			}
+			std::cout << cannonYaw << std::endl;
+		}
+
+		glm::mat4 launchMatrix = glm::mat4(1.0);
+		launchMatrix = glm::eulerAngleXYX(cannonPitch, 0.0f, cannonYaw);
+		glm::vec4 launchDirection(0.0f, 1.0f, 0.0f, 0.0f);
+		launchDirection = launchMatrix * launchDirection;
+		glm::vec3 launchPosition = launchDirection * 4.0f;
+
+		if (Key1->IsJustPressed())
+		{
+			bulletDef.Position = launchPosition;
+			bulletDef.Direction = launchDirection;
+			nPhysics::cProjectile* projectile = new nPhysics::cProjectile(bulletDef);
+			projectiles.push_back(projectile);
+			world->AddParticle(projectile);
+		}
+		if (Key2->IsJustPressed())
+		{
+			laserDef.Position = launchPosition;
+			laserDef.Direction = launchDirection;
+			nPhysics::cProjectile* projectile = new nPhysics::cProjectile(laserDef);
+			projectiles.push_back(projectile);
+			world->AddParticle(projectile);
+		}
+		if (Key3->IsJustPressed())
+		{
+			cannonBallDef.Position = launchPosition;
+			cannonBallDef.Direction = launchDirection;
+			nPhysics::cProjectile* projectile = new nPhysics::cProjectile(cannonBallDef);
+			projectiles.push_back(projectile);
+			world->AddParticle(projectile);
+		}
+		if (Key4->IsJustPressed())
+		{	
+			energyBallDef.Position = launchPosition;
+			energyBallDef.Direction = launchDirection;
+			nPhysics::cProjectile* projectile = new nPhysics::cProjectile(energyBallDef);
+			projectiles.push_back(projectile);
+			world->AddParticle(projectile);
+		}
+
+		
 		// update the camera
 		camera->Update(deltaTime);
 
@@ -563,34 +580,72 @@ void mainLoop()
 		nGraphics::BeginFrame(PerFrameVars);
 
 		planeGraphics->Render();
-		rockGraphics->GetVars()->ModelMatrix = glm::translate(glm::mat4(1.0f), position);
-		//cannonGraphics->GetVars()->ModelMatrix = glm::rotateY(glm::vec3(0.f, 1.0f, 0.f),1.57f);
-		//TODO: Make colors work
-		if (rockColor == 1)
-		{
-			//Gray bullet
-			glm::set(rockGraphics->GetVars()->ModelColor, 1.0f, 1.0f, 1.0f);
-		}
-		else if (rockColor == 2)
-		{
-			//Red laser
-			glm::set(rockGraphics->GetVars()->ModelColor, 1.0f, 0.0f, 0.0f);
-		}
-		else if(rockColor ==3)
-		{
-			//Black cannonball
-			glm::set(rockGraphics->GetVars()->ModelColor, 0.0f, 0.0f, 0.0f);
-		}
-		else if (rockColor == 4)
-		{
-			//Green energyball
-			glm::set(rockGraphics->GetVars()->ModelColor, 0.0f, 1.0f, 0.0f);
-		}
-		rockGraphics->Render();
+
+		glm::mat4 cannonMatrix = glm::mat4(1.0);
+		cannonMatrix = glm::eulerAngleXYX(cannonPitch, 0.0f, cannonYaw);
+		cannonMatrix = glm::translate(cannonMatrix, glm::vec3(0.0f, 0.0f, 0.0f));
+		cannonMatrix = glm::scale(cannonMatrix, glm::vec3(20.f, 20.1f, 20.1f));
+		cannonGraphics->GetVars()->ModelMatrix = cannonMatrix;
 		cannonGraphics->Render();
+		//cannonGraphics->GetVars()->ModelMatrix = glm::rotateY(glm::vec3(0.f, 1.0f, 0.f),1.57f);
+		//Different Projectile Colors
+		//if (rockColor == 1)
+		//{
+		//	//Gray bullet
+		//	glm::set(rockGraphics->GetVars()->ModelColor, 1.0f, 1.0f, 1.0f);
+		//}
+		//else if (rockColor == 2)
+		//{
+		//	//Red laser
+		//	glm::set(rockGraphics->GetVars()->ModelColor, 1.0f, 0.0f, 0.0f);
+		//}
+		//else if(rockColor ==3)
+		//{
+		//	//Black cannonball
+		//	glm::set(rockGraphics->GetVars()->ModelColor, 0.0f, 0.0f, 0.0f);
+		//}
+		//else if (rockColor == 4)
+		//{
+		//	//Green energyball
+		//	glm::set(rockGraphics->GetVars()->ModelColor, 0.0f, 1.0f, 0.0f);
+		//}
+		////Code to Turn Cannon
+		//
+		//rockGraphics->Render();
+
+		for (nPhysics::cProjectile* p : projectiles)
+		{
+			glm::mat4 projectileMatrix(1.0f);
+			projectileMatrix = glm::translate(projectileMatrix, p->GetPosition());
+			projectileMatrix = glm::scale(projectileMatrix, glm::vec3(p->GetRadius()));
+			rockGraphics->GetVars()->ModelMatrix = projectileMatrix;
+			rockGraphics->GetVars()->ModelColor = p->GetColour();
+			rockGraphics->Render();
+		}
+		
+		/*glm::set(graphicsDef.Position, 0.5f, 0.0f, 0.5f);
+	glm::set(graphicsDef.Rotation, -1.57f, 0.f, 0.f);
+	glm::set(graphicsDef.Scale, 20.f, 20.1f, 20.1f);*/
+
+
 
 		nGraphics::EndFrame();
 
+		for (std::vector<nPhysics::cProjectile* > ::iterator it = projectiles.begin(); it != projectiles.end();)
+		{
+			if ((*it)->GetIsAlive())
+			{
+				it++;
+			}
+			else
+			{
+				std::vector<nPhysics::cProjectile*>::iterator removeIt = it;
+				nPhysics::cProjectile* deadProjectile = *it;
+				it = projectiles.erase(removeIt);
+				world->RemoveParticle(deadProjectile);
+				delete deadProjectile;
+			}
+		}
 		// Exit conditions: press escape or close the window by the 'x' button
 		if (!(nInput::IsKeyUp::Escape() && !nGraphics::WindowShouldClose()))
 		{
@@ -599,94 +654,10 @@ void mainLoop()
 	}
 
 	// clean up!
-	world->RemoveParticle(particle);
-	delete particle;
+	for (nPhysics::cProjectile* p : projectiles)
+	{
+		world->RemoveParticle(p);
+		delete p;
+	}
 	delete world;
 }
-
-#pragma region OriginalHelpers
-float getRandom()
-{
-	return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-}
-
-float getRandom(float high)
-{
-	return static_cast<float>(rand()) / (static_cast<float>(RAND_MAX) / high);
-}
-
-float getRandom(float low, float high)
-{
-	return low + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX) / (high - low));
-}
-
-// Use as-is.  Do not change.
-glm::vec3 getRandomXVector()
-{
-	return glm::vec3(getRandom(0.1f, 1.f), 0.f, getRandom(0.1f, 1.f));
-}
-
-// Use as-is.  Do not change.
-glm::vec3 getRandomZVector()
-{
-	return glm::vec3(-getRandom(0.1f, 1.f), 0.f, getRandom(0.1f, 1.f));
-}
-
-bool particleIsAboveGround(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration)
-{
-	// TODO: Use the parameters to determine if the particle
-	//       is currently above the ground.
-	//       Return true if the particle is above the ground, false otherwise.
-	return position.y > 1.0f; // because our "sphere" has a radius of 1
-}
-
-bool particleIsMovingUpward(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration)
-{
-	// TODO: Use the parameters to determine if the particle
-	//       is currently moving upward.
-	//       Return true if the particle is above the ground, false otherwise.
-	return glm::dot(velocity, axes[1]) > 0;
-}
-
-void doTimeStepEuler(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration)
-{
-	// TODO: Implement the Euler Integration algorithm to advance
-	//       the simulation one step forward in time.
-	position += velocity * deltaTime;
-	velocity += acceleration * deltaTime;
-	timeElapsed += deltaTime;
-}
-
-void doTimeStepMidpoint(glm::mat3& axes, float& deltaTime, float& timeElapsed, glm::vec3& position, glm::vec3& velocity, glm::vec3& acceleration)
-{
-	// TODO: Implement the Midpoint Integration algorithm to advance
-	//       the simulation one step forward in time.
-	glm::vec3 oldVelocity = velocity;
-	velocity += acceleration * deltaTime;
-	position += (oldVelocity + velocity) * 2.f * deltaTime;
-	timeElapsed += deltaTime;
-}
-
-glm::mat3 orthonormalBasis(const glm::vec3& xVec, const glm::vec3& zVec)
-{
-	// TODO: Generate an orthonormal basis, using xVec and zVec.
-	//       The input vectors may be manipulated, however the 
-	//       returned axes must essentially be:
-	//       x-axis: sourced from xVec
-	//       y-axis: generated using math!
-	//       z-axis: sourced from zVec
-
-	// Generate y, by crossing z and x.
-	glm::vec3 x(xVec);
-	glm::vec3 z(zVec);
-	glm::vec3 y(glm::cross(z, x));
-	// Ensure z is orthogonal to both x and y.
-	z = glm::cross(x, y);
-	// Normalize everything.
-	x = glm::normalize(x);
-	y = glm::normalize(y);
-	z = glm::normalize(z);
-	// Return the result.
-	return glm::mat3(x, y, z);
-}
-#pragma endregion

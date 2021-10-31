@@ -8,6 +8,7 @@ namespace nPhysics
 		, mAcceleration(0.f)
 		, mDamping(0.995f)
 		, mAppliedForce(0.f)
+		, mIsAlive(true)
 	{
 		if (mass <= 0.f)
 		{
@@ -44,6 +45,16 @@ namespace nPhysics
 	float cParticle::GetDamping() const
 	{
 		return mDamping;
+	}
+
+	void cParticle::SetIsAlive(bool isAlive)
+	{
+		mIsAlive = isAlive;
+	}
+
+	bool cParticle::GetIsAlive() const
+	{
+		return mIsAlive;
 	}
 
 	float cParticle::GetMass() const
@@ -106,6 +117,11 @@ namespace nPhysics
 	void cParticle::ApplyForce(const glm::vec3& force)
 	{
 		mAppliedForce += force;
+	}
+
+	void cParticle::ApplyImpulse(const glm::vec3& impulse)
+	{
+		mVelocity += impulse * mInverseMass;
 	}
 	void cParticle::ClearAppliedForces()
 	{

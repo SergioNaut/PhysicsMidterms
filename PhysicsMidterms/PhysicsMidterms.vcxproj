@@ -169,7 +169,10 @@ copy /Y "$(SolutionDir)Extern\FreeImage\lib\x64\Debug\FreeImaged.dll" "$(OutDir)
     <ClCompile Include="src\input\cKey.cpp" />
     <ClCompile Include="src\input\input.cpp" />
     <ClCompile Include="src\physics\cParticle.cpp" />
+    <ClCompile Include="src\physics\cParticleForceRegistry.cpp" />
     <ClCompile Include="src\physics\cParticleWorld.cpp" />
+    <ClCompile Include="src\physics\cProjectile.cpp" />
+    <ClCompile Include="src\physics\particle_force_generators.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BulletConfig.xml" />
@@ -209,7 +212,11 @@ copy /Y "$(SolutionDir)Extern\FreeImage\lib\x64\Debug\FreeImaged.dll" "$(OutDir)
     <ClInclude Include="include\input\input.h" />
     <ClInclude Include="include\input\input_keys.h" />
     <ClInclude Include="include\physics\cParticle.h" />
+    <ClInclude Include="include\physics\cParticleForceRegistry.h" />
     <ClInclude Include="include\physics\cParticleWorld.h" />
+    <ClInclude Include="include\physics\cProjectile.h" />
+    <ClInclude Include="include\physics\iParticleForceGenerator.h" />
+    <ClInclude Include="include\physics\particle_force_generators.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

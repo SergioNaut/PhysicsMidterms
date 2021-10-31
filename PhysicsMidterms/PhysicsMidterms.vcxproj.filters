@@ -90,6 +90,15 @@
     <ClCompile Include="src\physics\cParticleWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\particle_force_generators.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\cParticleForceRegistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\cProjectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="BulletConfig.xml">
@@ -200,6 +209,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\physics\cParticle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physics\iParticleForceGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physics\particle_force_generators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physics\cParticleForceRegistry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physics\cProjectile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

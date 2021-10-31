@@ -11,8 +11,8 @@ namespace nGraphics
 		InvertPitch = false;
 		ZoomSpeed = 20.f;
 		MinDistance = 2.f;
-		Distance = 47.f;
-		MaxDistance = 80.f;
+		Distance = 10.f;
+		MaxDistance = 50.f;
 		Yaw = 0.f;
 		MinYaw = -0.7f;
 		MaxYaw = 0.7f;
@@ -139,39 +139,6 @@ namespace nGraphics
 			if (mDistance < mMinDistance) mDistance = mMinDistance;
 			if (mDistance > mMaxDistance) mDistance = mMaxDistance;
 		}
-
-		// LEFT and RIGHT keys for YAW LEFT and RIGHT
-		/*
-		bool pressLeft = nInput::IsKeyDown::Left();
-		bool pressRight = nInput::IsKeyDown::Right();
-		if (pressLeft != pressRight)
-		{
-			float yawSpeed = mYawSpeed;
-			if (pressLeft) yawSpeed *= -1.f;
-			mYaw += yawSpeed * dt;
-			if (mClampYaw)
-			{
-				mYaw = glm::clamp(mYaw, mMinYaw, mMaxYaw);
-			}
-		}
-		else if (mElasticYaw)
-		{
-			// swing back to zero
-			if (mYaw != 0.0f)
-			{
-				if (mYaw > 0.f)
-				{
-					mYaw -= mYawSpeed * dt;
-					if (mYaw < 0.f) mYaw = 0.f;
-				}
-				else
-				{
-					mYaw += mYawSpeed * dt;
-					if (mYaw > 0.f) mYaw = 0.f;
-				}
-			}
-		}
-		*/
 	}
 
 	void cCamera::UpdateView()

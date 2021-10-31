@@ -19,6 +19,8 @@ namespace nPhysics
 		glm::vec3 mAppliedForce;
 		//TO DO: Use Damping?
 		float mDamping;
+
+		bool mIsAlive;
 	public:
 		cParticle(float mass, const glm::vec3& position);
 		virtual ~cParticle();
@@ -26,6 +28,9 @@ namespace nPhysics
 		cParticle() = delete;
 		cParticle(cParticle& other) = delete;
 		cParticle& operator=(cParticle& other) = delete;
+
+		void SetIsAlive(bool isAlive);
+		bool GetIsAlive() const;
 
 		void SetDamping(float damping);
 		float GetDamping() const;
@@ -51,6 +56,7 @@ namespace nPhysics
 
 
 		void ApplyForce(const glm::vec3& force);
+		void ApplyImpulse(const glm::vec3& impulse);
 		void ClearAppliedForces();
 
 		void Integrate(float deltaTime);

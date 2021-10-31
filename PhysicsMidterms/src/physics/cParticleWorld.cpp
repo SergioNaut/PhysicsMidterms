@@ -5,11 +5,11 @@ namespace nPhysics
 {
 	cParticleWorld::cParticleWorld()
 	{
-
+		mForceRegistry = new cParticleForceRegistry();
 	}
 	cParticleWorld::~cParticleWorld()
 	{
-
+		delete mForceRegistry;
 	}
 
 	bool cParticleWorld::AddParticle(cParticle* particle)
@@ -39,7 +39,9 @@ namespace nPhysics
 		{
 			return false; // nothing was removed
 		}
-		// 2) Check if we have it.
+		// 2) Remove any force generators associated with it.
+		mForceRegistry->Deregister(particle);
+		// 3) Check if we have it.
 		//    If no: Add it, return false to indicate that nothign was removed
 		//    If yes: Removed it. Return true to indicate that it was removed
 		std::vector<cParticle*>::iterator itParticle = std::find(mParticles.begin(), mParticles.end(), particle);
@@ -54,6 +56,7 @@ namespace nPhysics
 	void cParticleWorld::TimeStep(float deltaTime)
 	{
 		// 1) Update Force Generators
+		mForceRegistry->UpdateForces(deltaTime);
 
 		// 2) Integrate the particles
 		IntegrateParticles(deltaTime);
@@ -62,7 +65,10 @@ namespace nPhysics
 		// 4) Resolve contacts
 
 	}
-
+	size_t cParticleWorld::NumParticles()
+	{
+		return mParticles.size();
+	}
 	void cParticleWorld::IntegrateParticles(float deltaTime)
 	{
 		// loop over our particles and tell them to integrate
@@ -72,5 +78,9 @@ namespace nPhysics
 			(*itParticle)->Integrate(deltaTime);
 			itParticle++;
 		}
+	}
+	cParticleForceRegistry* cParticleWorld::GetForceRegistry() const
+	{
+		return mForceRegistry;
 	}
 }
